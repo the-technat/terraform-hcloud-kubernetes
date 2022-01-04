@@ -1,5 +1,7 @@
 # terraform-hcloud-kubernetes
 
+[![pipeline status](https://code.immerda.ch/k8s_at_hetzner/terraform-hcloud-kubernetes/badges/develop/pipeline.svg)](https://code.immerda.ch/k8s_at_hetzner/terraform-hcloud-kubernetes/-/commits/develop) 
+
 Terraform Module to deploy the Infrastructure required for a Kubernetes Cluster at Hetzner Cloud
 
 ## Design Principles
