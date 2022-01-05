@@ -26,6 +26,18 @@ variable "ssh_source_ips" {
   description = "Limit the ips that are allowed to ssh into our cluster nodes."
 }
 
+variable "cluster_vpc_cidr" {
+  type = string
+  default = "10.123.0.0/16" 
+  description = "A valid CIDR for the cluster network (multiple subnets within that network will be created)"
+}
+
+variable "cluster_subnet_cidr" {
+  type = string
+  default = "10.123.1.0/24" 
+  description = "A valid CIDR within the cluster_vpc_cidr"
+}
+
 #----------------
 # Toggle Vars
 # Switch things on and off
@@ -72,6 +84,7 @@ variable "master_node_template" {
 
 variable "master_node_count" {
   type = number 
+  default = 3
   description = "How many master nodes do you want?"
   validation {
     condition = can(regex("^\\d*[13579]$", var.master_node_count))
@@ -83,4 +96,39 @@ variable "kubeapi_source_ips" {
   type = list(string)
   default = [ "0.0.0.0/0", "::/0" ]
   description = "Limit the ips that are allowed to talk to our kubeapi. (Worker-nodes will always be allowed)"
+}
+
+#----------------
+# Worker node vars
+#----------------
+variable "worker_node_template" {
+  type = object({
+    prefix = string 
+    server_type = string 
+    image = string
+    ci_user = string
+    ssh_keys = list(string)
+    ssh_port = number
+  })
+  description = "A template how a worker node is provisioned"
+  # default = {
+  #   image = "debian-11"
+  #   server_type = "cpx31"
+  #   prefix = "master"
+  #   ci_user = "ci"
+  #   ci_user_ssh_keys = []
+  #   ssh_port = 58222
+  # }
+}
+
+variable "worker_node_count" {
+  type = number 
+  description = "How many worker nodes do you want?"
+  default = 3
+}
+
+variable "nodeport_source_ips" {
+  type = list(string) 
+  default = [ "0.0.0.0/0", "::/0" ]
+  description = "How is allowed to connect to your nodeport servics (e.g only a LoadBalancer...)"
 }

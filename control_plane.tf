@@ -43,6 +43,13 @@ resource "hcloud_firewall" "control_plane" {
   }
 }
 
+resource "hcloud_server_network" "master" {
+  count = var.master_node_count
+
+  server_id = hcloud_server.master[count.index].id 
+  subnet_id = hcloud_network_subnet.cluster_subnet.id
+}
+
 #----------------
 # Compute
 #----------------
@@ -64,6 +71,7 @@ resource "hcloud_server" "master" {
   location    = var.region
   placement_group_id = hcloud_placement_group.control_plane.id
   backups     = var.enable_server_backups
+  # ssh_keys = var.master_node_template.ssh_keys
 
   user_data = templatefile(
     "${path.module}/templates/control_plane_cloud-init.tmpl",
