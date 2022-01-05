@@ -31,6 +31,11 @@ No modules.
 
 | Name | Type |
 |------|------|
+| [hcloud_firewall.control_plane](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/firewall) | resource |
+| [hcloud_floating_ip.kubeapi](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/floating_ip) | resource |
+| [hcloud_floating_ip_assignment.main](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/floating_ip_assignment) | resource |
+| [hcloud_placement_group.control_plane](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/placement_group) | resource |
+| [hcloud_server.master](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/server) | resource |
 | [hcloud_locations.datacenters](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/data-sources/locations) | data source |
 | [hcloud_server_types.instance_types](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/data-sources/server_types) | data source |
 
@@ -38,8 +43,15 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | A cluster-name that is used to suffix every resource name | `string` | n/a | yes |
 | <a name="input_common_labels"></a> [common\_labels](#input\_common\_labels) | Common map of labels to add on all resources | `map(string)` | `{}` | no |
-| <a name="input_control_plane_node_count"></a> [control\_plane\_node\_count](#input\_control\_plane\_node\_count) | How many master nodes do you want? | `number` | `3` | no |
+| <a name="input_enable_server_backups"></a> [enable\_server\_backups](#input\_enable\_server\_backups) | Wether to enable server backups in hcloud. | `bool` | `false` | no |
+| <a name="input_kubeapi_ip_type"></a> [kubeapi\_ip\_type](#input\_kubeapi\_ip\_type) | Should your kubeapi be rechable on an IPv4 or IPv6 address? | `string` | `"ipv6"` | no |
+| <a name="input_kubeapi_source_ips"></a> [kubeapi\_source\_ips](#input\_kubeapi\_source\_ips) | Limit the ips that are allowed to talk to our kubeapi. (Worker-nodes will always be allowed) | `list(string)` | <pre>[<br>  "0.0.0.0/0",<br>  "::/0"<br>]</pre> | no |
+| <a name="input_master_node_count"></a> [master\_node\_count](#input\_master\_node\_count) | How many master nodes do you want? | `number` | n/a | yes |
+| <a name="input_master_node_template"></a> [master\_node\_template](#input\_master\_node\_template) | A template how a master node is provisioned | <pre>object({<br>    prefix = string <br>    server_type = string <br>    image = string<br>    ci_user = string<br>    ssh_keys = list(string)<br>    ssh_port = number<br>  })</pre> | n/a | yes |
+| <a name="input_region"></a> [region](#input\_region) | In which region should your cluster be? | `string` | n/a | yes |
+| <a name="input_ssh_source_ips"></a> [ssh\_source\_ips](#input\_ssh\_source\_ips) | Limit the ips that are allowed to ssh into our cluster nodes. | `list(string)` | <pre>[<br>  "0.0.0.0/0",<br>  "::/0"<br>]</pre> | no |
 
 ## Outputs
 
