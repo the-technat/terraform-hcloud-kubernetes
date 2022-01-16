@@ -46,6 +46,11 @@ resource "hcloud_placement_group" "compute_plane" {
   }, var.common_labels)
 }
 
+resource "random_shuffle" "worker_locations" {
+  input        = local.datacenters[var.region]
+  result_count = var.worker_node_count
+}
+
 resource "hcloud_server" "worker" {
   count = var.worker_node_count
 
@@ -54,7 +59,7 @@ resource "hcloud_server" "worker" {
   server_type        = var.worker_node_template.server_type
   placement_group_id = hcloud_placement_group.compute_plane.id
   backups            = var.enable_server_backups
-  location           = var.region
+  location           = random_shuffle.worker_locations.result[count.index]
   # ssh_keys = var.worker_node_template.ssh_keys
 
   user_data = templatefile(

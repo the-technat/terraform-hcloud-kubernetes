@@ -3,7 +3,7 @@
 #----------------
 resource "hcloud_floating_ip" "kubeapi" {
   type          = var.kubeapi_ip_type
-  home_location = var.region
+  home_location = local.datacenters[var.region][0]
   name          = "kubeapi-${var.cluster_name}"
   description   = "kubeapi IP for ${var.cluster_name} cluster"
   labels = merge({
@@ -62,13 +62,18 @@ resource "hcloud_placement_group" "control_plane" {
   }, var.common_labels)
 }
 
+resource "random_shuffle" "control_plane_locations" {
+  input        = local.datacenters[var.region]
+  result_count = var.master_node_count
+}
+
 resource "hcloud_server" "master" {
   count = var.master_node_count
 
   name               = "${var.master_node_template.prefix}-${count.index}"
   image              = var.master_node_template.image
   server_type        = var.master_node_template.server_type
-  location           = var.region
+  location           = random_shuffle.control_plane_locations.result[count.index]
   placement_group_id = hcloud_placement_group.control_plane.id
   backups            = var.enable_server_backups
   # ssh_keys = var.master_node_template.ssh_keys

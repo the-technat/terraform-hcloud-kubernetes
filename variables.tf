@@ -15,8 +15,8 @@ variable "region" {
   type        = string
   description = "In which region should your cluster be?"
   validation {
-    condition     = can(regex("(hel1|ash|nbg1|fsn1)", var.region))
-    error_message = "The region must be one of the following values: [hel1, ash, ngb1, fsn1]."
+    condition     = can(regex("(eu-central|us-east)", var.region))
+    error_message = "The region must be one of the following values: [eu-central, us-east]."
   }
 }
 
