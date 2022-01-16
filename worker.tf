@@ -60,7 +60,7 @@ resource "hcloud_server" "worker" {
   placement_group_id = hcloud_placement_group.compute_plane.id
   backups            = var.enable_server_backups
   location           = random_shuffle.worker_locations.result[count.index]
-  # ssh_keys = var.worker_node_template.ssh_keys
+  ssh_keys           = var.worker_node_template.ssh_keys
 
   user_data = templatefile(
     "${path.module}/templates/compute_plane_cloud-init.tmpl",

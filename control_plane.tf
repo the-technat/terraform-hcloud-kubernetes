@@ -76,7 +76,7 @@ resource "hcloud_server" "master" {
   location           = random_shuffle.control_plane_locations.result[count.index]
   placement_group_id = hcloud_placement_group.control_plane.id
   backups            = var.enable_server_backups
-  # ssh_keys = var.master_node_template.ssh_keys
+  ssh_keys           = var.master_node_template.ssh_keys
 
   user_data = templatefile(
     "${path.module}/templates/control_plane_cloud-init.tmpl",
