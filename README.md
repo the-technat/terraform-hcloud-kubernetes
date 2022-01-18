@@ -10,7 +10,14 @@ As the [Kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes
 
 ## Usage
 
-An example repo how to call this module can be found [here](TODO: create example environment repo).
+An example repo how to call this module can be found [here](https://code.immerda.ch/k8s_at_hetzner/example.com).
+
+## To Do
+
+A list of open ideas:
+
+- [ ] Generate ansible kubespray inventory similar to [this one](https://github.com/kubernetes-sigs/kubespray/blob/master/contrib/terraform/hetzner/modules/kubernetes-cluster/templates/cloud-init.tmpl)
+- [ ] Create module release pipeline with semversions and publish to TF registry 
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
