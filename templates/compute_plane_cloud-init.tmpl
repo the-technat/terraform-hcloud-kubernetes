@@ -1,7 +1,7 @@
 #cloud-config control_plane node
 
 users:
-  - name: ${ci_user}
+  - name: ${ssh_user}
     groups: sudo
     sudo: ALL=(ALL) NOPASSWD:ALL # Allow any operations using sudo
     lock_passwd: True # disable password login

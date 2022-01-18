@@ -10,6 +10,6 @@ resource "hcloud_network" "cluster_net" {
 resource "hcloud_network_subnet" "cluster_subnet" {
   network_id   = hcloud_network.cluster_net.id
   type         = "server"
-  network_zone = var.region == "ash" ? "us-east" : "eu-central"
+  network_zone = var.region
   ip_range     = var.cluster_subnet_cidr
 }

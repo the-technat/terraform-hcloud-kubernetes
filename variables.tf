@@ -6,6 +6,7 @@ variable "common_labels" {
   default     = {}
   description = "Common map of labels to add on all resources"
 }
+
 variable "cluster_name" {
   type        = string
   description = "A cluster-name that is used to suffix every resource name"
@@ -42,54 +43,74 @@ variable "cluster_subnet_cidr" {
 # Toggle Vars
 # Switch things on and off
 #----------------
-
 variable "enable_server_backups" {
   type        = bool
   default     = false
   description = "Wether to enable server backups in hcloud."
 }
 
+variable "ip_mode" {
+  type        = string
+  default     = "ipv6"
+  description = "All in on IPv4 or IPv6?"
+  validation {
+    condition     = can(regex("(ipv4|ipv6)", var.ip_mode))
+    error_message = "The ip_mode must either by 'ipv4' or 'ipv6'."
+  }
+}
+
+#----------------
+# SSH vars (default)
+#----------------
+variable "default_ssh_port" {
+  type        = number
+  default     = 22
+  description = "The default SSH Port configured and rechable on each machine"
+}
+
+variable "default_ssh_user" {
+  type        = string
+  default     = "ansible"
+  description = "Username of a default admin user created on every machine (used by ansible)"
+}
+
+variable "default_ssh_keys" {
+  type        = list(string)
+  description = "List of default (public) ssh keys to configure on the ssh_user"
+}
+
 #----------------
 # Control Plane vars
 #----------------
-variable "kubeapi_ip_type" {
-  type        = string
-  default     = "ipv6"
-  description = "Should your kubeapi be rechable on an IPv4 or IPv6 address?"
-  validation {
-    condition     = can(regex("(ipv4|ipv6)", var.kubeapi_ip_type))
-    error_message = "The kubeapi_ip_type must either by 'ipv4' or 'ipv6'."
-  }
-}
-
-variable "master_node_template" {
-  type = object({
-    prefix      = string
+variable "master_nodes" {
+  type = list(object({
+    name        = string
     server_type = string
     image       = string
-    ci_user     = string
-    ssh_keys    = list(string)
-    ssh_port    = number
-  })
-  description = "A template how a master node is provisioned"
-  # default = {
-  #   image = "debian-11"
-  #   server_type = "cpx11"
-  #   prefix = "master"
-  #   ci_user = "ci"
-  #   ci_user_ssh_keys = []
-  #   ssh_port = 58222
-  # }
-}
-
-variable "master_node_count" {
-  type        = number
-  default     = 3
-  description = "How many master nodes do you want?"
-  validation {
-    condition     = can(regex("^\\d*[13579]$", var.master_node_count))
-    error_message = "The master_node_count must be an odd number for optimal reliability."
-  }
+    labels      = map(string)
+    location    = string
+    volumes = list(object({
+      name    = string
+      size_gb = number
+    }))
+    ssh_user = string
+    ssh_keys = list(string)
+    ssh_port = number
+  }))
+  description = "List of master nodes to provision in the cluster, each master node has a set of values you can configure, ssh_* variables use the default if omitted"
+  default = [
+    {
+      name        = "master-0"
+      server_type = "cpx11"
+      image       = "debian-11"
+      labels      = {}
+      location    = "hel1"
+      volumes     = []
+      ssh_user    = ""
+      ssh_keys    = []
+      ssh_port    = 0
+    }
+  ]
 }
 
 variable "kubeapi_source_ips" {
@@ -101,34 +122,39 @@ variable "kubeapi_source_ips" {
 #----------------
 # Worker node vars
 #----------------
-variable "worker_node_template" {
-  type = object({
-    prefix      = string
+variable "worker_nodes" {
+  type = list(object({
+    name        = string
     server_type = string
     image       = string
-    ci_user     = string
-    ssh_keys    = list(string)
-    ssh_port    = number
-  })
-  description = "A template how a worker node is provisioned"
-  # default = {
-  #   image = "debian-11"
-  #   server_type = "cpx31"
-  #   prefix = "master"
-  #   ci_user = "ci"
-  #   ci_user_ssh_keys = []
-  #   ssh_port = 58222
-  # }
-}
-
-variable "worker_node_count" {
-  type        = number
-  description = "How many worker nodes do you want?"
-  default     = 3
+    labels      = map(string)
+    location    = string
+    volumes = list(object({
+      name    = string
+      size_gb = number
+    }))
+    ssh_user = string
+    ssh_keys = list(string)
+    ssh_port = number
+  }))
+  description = "List of worker nodes to provision in the cluster, each master node has a set of values you can configure, ssh_* variables use the default if omitted"
+  default = [
+    {
+      name        = "worker-0"
+      server_type = "cpx31"
+      image       = "debian-11"
+      labels      = {}
+      location    = "nbg1"
+      volumes     = []
+      ssh_user    = ""
+      ssh_keys    = []
+      ssh_port    = 0
+    }
+  ]
 }
 
 variable "nodeport_source_ips" {
   type        = list(string)
   default     = ["0.0.0.0/0", "::/0"]
-  description = "How is allowed to connect to your nodeport servics (e.g only a LoadBalancer...)"
+  description = "Who is allowed to connect to your nodeport servics (e.g only a LoadBalancer...)"
 }
