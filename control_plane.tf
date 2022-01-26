@@ -7,8 +7,9 @@ resource "hcloud_floating_ip" "kubeapi" {
   name          = "kubeapi-${var.cluster_name}"
   description   = "kubeapi IP for ${var.cluster_name} cluster"
   labels = merge({
-    "managed-by"   = "terraform"
-    "cluster-name" = var.cluster_name
+    "managed-by"     = "terraform"
+    "service"       = "k8s_at_hetzner"
+    "cluster-name"   = var.cluster_name
   }, var.common_labels)
 }
 
@@ -23,6 +24,7 @@ resource "hcloud_firewall" "control_plane" {
   name = each.value.name
   labels = merge({
     "managed-by"   = "terraform"
+    "service"       = "k8s_at_hetzner"
     "cluster-name" = var.cluster_name
   }, var.common_labels, each.value.labels)
 
@@ -53,6 +55,7 @@ resource "hcloud_placement_group" "control_plane" {
   type = "spread"
   labels = merge({
     "managed-by"   = "terraform"
+    "service"       = "k8s_at_hetzner"
     "cluster-name" = var.cluster_name
   }, var.common_labels)
 }
@@ -90,6 +93,7 @@ resource "hcloud_server" "master" {
 
   labels = merge({
     "managed-by"    = "terraform"
+    "service"       = "k8s_at_hetzner"
     "cluster-name"  = var.cluster_name
     "role"          = "master"
     "control_plane" = "true"
