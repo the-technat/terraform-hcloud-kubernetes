@@ -6,9 +6,10 @@ resource "hcloud_firewall" "compute_plane" {
 
   name = each.value.name
   labels = merge({
-    "managed-by"   = "terraform"
-    "cluster-name" = var.cluster_name
-  }, var.common_labels, each.value.labels)
+    "managed-by"     = "terraform"
+    "service"       = "k8s_at_hetzner"
+    "cluster-name"   = var.cluster_name
+  }, var.common_labels)
 
   rule {
     direction  = "in"
@@ -37,6 +38,7 @@ resource "hcloud_placement_group" "compute_plane" {
   type = "spread"
   labels = merge({
     "managed-by"   = "terraform"
+    "service"       = "k8s_at_hetzner"
     "cluster-name" = var.cluster_name
   }, var.common_labels)
 }
@@ -74,8 +76,8 @@ resource "hcloud_server" "worker" {
 
   labels = merge({
     "managed-by"    = "terraform"
+    "service"       = "k8s_at_hetzner"
     "cluster-name"  = var.cluster_name
-    "role"          = "worker"
     "compute_plane" = "true"
   }, var.common_labels, each.value.labels)
 }
