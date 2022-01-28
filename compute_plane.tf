@@ -68,7 +68,7 @@ resource "hcloud_server" "worker" {
   backups            = var.enable_server_backups
   ssh_keys           = var.worker_nodes[count.index].ssh_keys != [] ? var.worker_nodes[count.index].ssh_keys : var.default_ssh_keys
   network {
-    network_id = hcloud_network_subnet.cluster_subnet.id
+    network_id = hcloud_network.cluster_net.id
   }
 
   user_data = templatefile(
@@ -86,4 +86,6 @@ resource "hcloud_server" "worker" {
     "cluster-name"  = var.cluster_name
     "compute_plane" = "true"
   }, var.common_labels, var.worker_nodes[count.index].labels)
+
+  depends_on = [hcloud_network_subnet.cluster_subnet]
 }

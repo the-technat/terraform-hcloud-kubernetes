@@ -7,9 +7,9 @@ resource "hcloud_floating_ip" "kubeapi" {
   name          = "kubeapi-${var.cluster_name}"
   description   = "kubeapi IP for ${var.cluster_name} cluster"
   labels = merge({
-    "managed-by"     = "terraform"
-    "service"       = "k8s_at_hetzner"
-    "cluster-name"   = var.cluster_name
+    "managed-by"   = "terraform"
+    "service"      = "k8s_at_hetzner"
+    "cluster-name" = var.cluster_name
   }, var.common_labels)
 }
 
@@ -24,7 +24,7 @@ resource "hcloud_firewall" "control_plane" {
   name = var.master_nodes[count.index].name
   labels = merge({
     "managed-by"   = "terraform"
-    "service"       = "k8s_at_hetzner"
+    "service"      = "k8s_at_hetzner"
     "cluster-name" = var.cluster_name
   }, var.common_labels, var.master_nodes[count.index].labels)
 
@@ -55,7 +55,7 @@ resource "hcloud_placement_group" "control_plane" {
   type = "spread"
   labels = merge({
     "managed-by"   = "terraform"
-    "service"       = "k8s_at_hetzner"
+    "service"      = "k8s_at_hetzner"
     "cluster-name" = var.cluster_name
   }, var.common_labels)
 }
@@ -85,7 +85,7 @@ resource "hcloud_server" "master" {
   backups            = var.enable_server_backups
   ssh_keys           = var.master_nodes[count.index].ssh_keys != [] ? var.master_nodes[count.index].ssh_keys : var.default_ssh_keys
   network {
-    network_id = hcloud_network_subnet.cluster_subnet.id
+    network_id = hcloud_network.cluster_net.id
   }
 
   user_data = templatefile(
@@ -104,4 +104,6 @@ resource "hcloud_server" "master" {
     "role"          = "master"
     "control_plane" = "true"
   }, var.common_labels, var.master_nodes[count.index].labels)
+
+  depends_on = [hcloud_network_subnet.cluster_subnet]
 }
