@@ -156,5 +156,5 @@ variable "worker_nodes" {
 variable "nodeport_source_ips" {
   type        = list(string)
   default     = ["0.0.0.0/0", "::/0"]
-  description = "Who is allowed to connect to your nodeport servics (e.g only a LoadBalancer...)"
+  description = "Who is allowed to connect to your nodeport services (e.g only a LoadBalancer...)"
 }

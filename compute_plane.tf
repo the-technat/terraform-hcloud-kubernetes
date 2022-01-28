@@ -2,19 +2,19 @@
 # Networking
 #----------------
 resource "hcloud_firewall" "compute_plane" {
-  for_each = var.worker_nodes
+  count = length(var.worker_nodes)
 
-  name = each.value.name
+  name = var.worker_nodes[count.index].name
   labels = merge({
-    "managed-by"     = "terraform"
-    "service"       = "k8s_at_hetzner"
-    "cluster-name"   = var.cluster_name
-  }, var.common_labels)
+    "managed-by"   = "terraform"
+    "cluster-name" = var.cluster_name
+    "service"      = "k8s_at_hetzner"
+  }, var.common_labels, var.worker_nodes[count.index].labels)
 
   rule {
     direction  = "in"
     protocol   = "tcp"
-    port       = each.value.ssh_port != 0 ? each.value.ssh_port : var.default_ssh_port
+    port       = var.worker_nodes[count.index].ssh_port != 0 ? var.worker_nodes[count.index].ssh_port : var.default_ssh_port
     source_ips = var.ssh_source_ips
   }
 
@@ -26,7 +26,7 @@ resource "hcloud_firewall" "compute_plane" {
   }
 
   apply_to {
-    server = hcloud_server.worker[each.key].id
+    server = hcloud_server.worker[count.index].id
   }
 }
 
@@ -38,29 +38,35 @@ resource "hcloud_placement_group" "compute_plane" {
   type = "spread"
   labels = merge({
     "managed-by"   = "terraform"
-    "service"       = "k8s_at_hetzner"
+    "service"      = "k8s_at_hetzner"
     "cluster-name" = var.cluster_name
   }, var.common_labels)
 }
 
 resource "hcloud_volume" "worker" {
-  for_each = var.worker_nodes
+  count = length(local.worker_volumes)
 
-  name      = each.value.name
-  size      = each.value.size_gb
-  server_id = hcloud_server.worker[each.key].id
+  name      = local.worker_volumes[count.index].name
+  size      = local.worker_volumes[count.index].size
+  server_id = local.worker_volumes[count.index].server_id
+
+  labels = merge({
+    "managed-by"   = "terraform"
+    "cluster-name" = var.cluster_name
+  }, var.common_labels)
+
 }
 
 resource "hcloud_server" "worker" {
-  for_each = var.worker_nodes
+  count = length(var.worker_nodes)
 
-  name               = each.value.name
-  server_type        = each.value.server_type
-  image              = each.value.image
-  location           = each.value.location
+  name               = var.worker_nodes[count.index].name
+  server_type        = var.worker_nodes[count.index].server_type
+  image              = var.worker_nodes[count.index].image
+  location           = var.worker_nodes[count.index].location
   placement_group_id = hcloud_placement_group.compute_plane.id
   backups            = var.enable_server_backups
-  ssh_keys           = each.value.ssh_keys != [] ? each.value.ssh_keys : var.default_ssh_keys
+  ssh_keys           = var.worker_nodes[count.index].ssh_keys != [] ? var.worker_nodes[count.index].ssh_keys : var.default_ssh_keys
   network {
     network_id = hcloud_network_subnet.cluster_subnet.id
   }
@@ -68,9 +74,9 @@ resource "hcloud_server" "worker" {
   user_data = templatefile(
     "${path.module}/templates/compute_plane_cloud-init.tmpl",
     {
-      ssh_user = each.value.ssh_user != "" ? each.value.ssh_user : var.default_ssh_user
-      ssh_keys = each.value.ssh_keys != [] ? each.value.ssh_keys : var.default_ssh_keys
-      ssh_port = each.value.ssh_port != 0 ? each.value.ssh_port : var.default_ssh_port
+      ssh_user = var.worker_nodes[count.index].ssh_user != "" ? var.worker_nodes[count.index].ssh_user : var.default_ssh_user
+      ssh_keys = var.worker_nodes[count.index].ssh_keys != [] ? var.worker_nodes[count.index].ssh_keys : var.default_ssh_keys
+      ssh_port = var.worker_nodes[count.index].ssh_port != 0 ? var.worker_nodes[count.index].ssh_port : var.default_ssh_port
     }
   )
 
@@ -79,5 +85,5 @@ resource "hcloud_server" "worker" {
     "service"       = "k8s_at_hetzner"
     "cluster-name"  = var.cluster_name
     "compute_plane" = "true"
-  }, var.common_labels, each.value.labels)
+  }, var.common_labels, var.worker_nodes[count.index].labels)
 }

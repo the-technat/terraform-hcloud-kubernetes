@@ -19,19 +19,19 @@ resource "hcloud_floating_ip_assignment" "main" {
 }
 
 resource "hcloud_firewall" "control_plane" {
-  for_each = var.master_nodes
+  count = length(var.master_nodes)
 
-  name = each.value.name
+  name = var.master_nodes[count.index].name
   labels = merge({
     "managed-by"   = "terraform"
     "service"       = "k8s_at_hetzner"
     "cluster-name" = var.cluster_name
-  }, var.common_labels, each.value.labels)
+  }, var.common_labels, var.master_nodes[count.index].labels)
 
   rule {
     direction  = "in"
     protocol   = "tcp"
-    port       = each.value.ssh_port != 0 ? each.value.ssh_port : var.default_ssh_port
+    port       = var.master_nodes[count.index].ssh_port != 0 ? var.master_nodes[count.index].ssh_port : var.default_ssh_port
     source_ips = var.ssh_source_ips
   }
 
@@ -43,7 +43,7 @@ resource "hcloud_firewall" "control_plane" {
   }
 
   apply_to {
-    server = hcloud_server.master[each.key].id
+    server = hcloud_server.master[count.index].id
   }
 }
 
@@ -61,23 +61,29 @@ resource "hcloud_placement_group" "control_plane" {
 }
 
 resource "hcloud_volume" "master" {
-  for_each = var.master_nodes
+  count = length(local.master_volumes)
 
-  name      = each.value.name
-  size      = each.value.size_gb
-  server_id = hcloud_server.master[each.key].id
+  name      = local.master_volumes[count.index].name
+  size      = local.master_volumes[count.index].size
+  server_id = local.master_volumes[count.index].server_id
+
+  labels = merge({
+    "managed-by"   = "terraform"
+    "cluster-name" = var.cluster_name
+  }, var.common_labels)
+
 }
 
 resource "hcloud_server" "master" {
-  for_each = var.master_nodes
+  count = length(var.master_nodes)
 
-  name               = each.value.name
-  server_type        = each.value.server_type
-  image              = each.value.image
-  location           = each.value.location
+  name               = var.master_nodes[count.index].name
+  server_type        = var.master_nodes[count.index].server_type
+  image              = var.master_nodes[count.index].image
+  location           = var.master_nodes[count.index].location
   placement_group_id = hcloud_placement_group.control_plane.id
   backups            = var.enable_server_backups
-  ssh_keys           = each.value.ssh_keys != [] ? each.value.ssh_keys : var.default_ssh_keys
+  ssh_keys           = var.master_nodes[count.index].ssh_keys != [] ? var.master_nodes[count.index].ssh_keys : var.default_ssh_keys
   network {
     network_id = hcloud_network_subnet.cluster_subnet.id
   }
@@ -85,9 +91,9 @@ resource "hcloud_server" "master" {
   user_data = templatefile(
     "${path.module}/templates/control_plane_cloud-init.tmpl",
     {
-      ssh_user = each.value.ssh_user != "" ? each.value.ssh_user : var.default_ssh_user
-      ssh_keys = each.value.ssh_keys != [] ? each.value.ssh_keys : var.default_ssh_keys
-      ssh_port = each.value.ssh_port != 0 ? each.value.ssh_port : var.default_ssh_port
+      ssh_user = var.master_nodes[count.index].ssh_user != "" ? var.master_nodes[count.index].ssh_user : var.default_ssh_user
+      ssh_keys = var.master_nodes[count.index].ssh_keys != [] ? var.master_nodes[count.index].ssh_keys : var.default_ssh_keys
+      ssh_port = var.master_nodes[count.index].ssh_port != 0 ? var.master_nodes[count.index].ssh_port : var.default_ssh_port
     }
   )
 
@@ -97,5 +103,5 @@ resource "hcloud_server" "master" {
     "cluster-name"  = var.cluster_name
     "role"          = "master"
     "control_plane" = "true"
-  }, var.common_labels, each.value.labels)
+  }, var.common_labels, var.master_nodes[count.index].labels)
 }
