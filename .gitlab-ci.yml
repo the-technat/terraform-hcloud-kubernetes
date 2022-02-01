@@ -1,0 +1,17 @@
+# Ref: https://matavelli.io/posts/2020/01/setup-gitlab-ci-with-terraform/
+stages:
+  - validate
+
+default:
+  image:
+    name: hashicorp/terraform:latest
+    entrypoint:
+      - /usr/bin/env
+      - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  before_script:
+    - terraform init
+
+terraform_validate:
+  stage: validate
+  script:
+  - terraform validate
