@@ -28,7 +28,8 @@ No requirements.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_hcloud"></a> [hcloud](#provider\_hcloud) | 1.32.2 |
+| <a name="provider_hcloud"></a> [hcloud](#provider\_hcloud) | n/a |
+| <a name="provider_template"></a> [template](#provider\_template) | n/a |
 
 ## Modules
 
@@ -52,6 +53,7 @@ No modules.
 | [hcloud_volume.worker](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/volume) | resource |
 | [hcloud_locations.datacenters](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/data-sources/locations) | data source |
 | [hcloud_server_types.instance_types](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/data-sources/server_types) | data source |
+| [template_file.inventory](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file) | data source |
 
 ## Inputs
 
@@ -69,11 +71,13 @@ No modules.
 | <a name="input_kubeapi_source_ips"></a> [kubeapi\_source\_ips](#input\_kubeapi\_source\_ips) | Limit the ips that are allowed to talk to our kubeapi. (Worker-nodes will always be allowed) | `list(string)` | <pre>[<br>  "0.0.0.0/0",<br>  "::/0"<br>]</pre> | no |
 | <a name="input_master_nodes"></a> [master\_nodes](#input\_master\_nodes) | List of master nodes to provision in the cluster, each master node has a set of values you can configure, ssh\_* variables use the default if omitted | <pre>list(object({<br>    name        = string<br>    server_type = string<br>    image       = string<br>    labels      = map(string)<br>    location    = string<br>    volumes = list(object({<br>      name    = string<br>      size_gb = number<br>    }))<br>    ssh_user = string<br>    ssh_keys = list(string)<br>    ssh_port = number<br>  }))</pre> | <pre>[<br>  {<br>    "image": "debian-11",<br>    "labels": {},<br>    "location": "hel1",<br>    "name": "master-0",<br>    "server_type": "cpx11",<br>    "ssh_keys": [],<br>    "ssh_port": 0,<br>    "ssh_user": "",<br>    "volumes": []<br>  }<br>]</pre> | no |
 | <a name="input_nodeport_source_ips"></a> [nodeport\_source\_ips](#input\_nodeport\_source\_ips) | Who is allowed to connect to your nodeport services (e.g only a LoadBalancer...) | `list(string)` | <pre>[<br>  "0.0.0.0/0",<br>  "::/0"<br>]</pre> | no |
-| <a name="input_region"></a> [region](#input\_region) | In which region should your cluster be? | `string` | n/a | yes |
+| <a name="input_region"></a> [region](#input\_region) | In which region should your cluster be? (eu-central, us-east) | `string` | n/a | yes |
 | <a name="input_ssh_source_ips"></a> [ssh\_source\_ips](#input\_ssh\_source\_ips) | Limit the ips that are allowed to ssh into our cluster nodes. | `list(string)` | <pre>[<br>  "0.0.0.0/0",<br>  "::/0"<br>]</pre> | no |
 | <a name="input_worker_nodes"></a> [worker\_nodes](#input\_worker\_nodes) | List of worker nodes to provision in the cluster, each master node has a set of values you can configure, ssh\_* variables use the default if omitted | <pre>list(object({<br>    name        = string<br>    server_type = string<br>    image       = string<br>    labels      = map(string)<br>    location    = string<br>    volumes = list(object({<br>      name    = string<br>      size_gb = number<br>    }))<br>    ssh_user = string<br>    ssh_keys = list(string)<br>    ssh_port = number<br>  }))</pre> | <pre>[<br>  {<br>    "image": "debian-11",<br>    "labels": {},<br>    "location": "nbg1",<br>    "name": "worker-0",<br>    "server_type": "cpx31",<br>    "ssh_keys": [],<br>    "ssh_port": 0,<br>    "ssh_user": "",<br>    "volumes": []<br>  }<br>]</pre> | no |
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_inventory"></a> [inventory](#output\_inventory) | Ansible inventory file for kubespray |
 <!-- END_TF_DOCS -->

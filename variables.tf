@@ -14,7 +14,7 @@ variable "cluster_name" {
 
 variable "region" {
   type        = string
-  description = "In which region should your cluster be?"
+  description = "In which region should your cluster be? (eu-central, us-east)"
   validation {
     condition     = can(regex("(eu-central|us-east)", var.region))
     error_message = "The region must be one of the following values: [eu-central, us-east]."
@@ -38,6 +38,7 @@ variable "cluster_subnet_cidr" {
   default     = "10.123.1.0/24"
   description = "A valid CIDR within the cluster_vpc_cidr"
 }
+
 
 #----------------
 # Toggle Vars
