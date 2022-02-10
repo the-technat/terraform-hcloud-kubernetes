@@ -3,13 +3,13 @@ ${connection_strings_master}
 ${connection_strings_worker}
 
 [kube-master]
-${connection_strings_master}
+${list_masters}
 
 [etcd]
-${connection_strings_master}
+${list_masters}
 
 [kube-node]
-${connection_strings_worker}
+${list_workers}
 
 [k8s-cluster:children]
 kube-master

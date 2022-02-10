@@ -31,9 +31,12 @@ data "template_file" "inventory" {
   template = file("${path.module}/templates/inventory.tpl")
 
   vars = {
-    connection_strings_master = join("\n", formatlist("%s ansible_user=%s ansible_host=%s ansible_port=%d", var.master_nodes[*].name, var.ssh_user, hcloud_server.master[*].ipv4_address, var.ssh_port))
+    connection_strings_master = join("\n", formatlist("%s ansible_user=%s ansible_host=%s ansible_port=%d etcd_member_name=%s", var.master_nodes[*].name, var.ssh_user, hcloud_server.master[*].ipv4_address, var.ssh_port, var.master_nodes[*].name))
 
     connection_strings_worker = join("\n", formatlist("%s ansible_user=%s ansible_host=%s ansible_port=%d", var.worker_nodes[*].name, var.ssh_user, hcloud_server.worker[*].ipv4_address, var.ssh_port))
+
+    list_masters = join("\n", var.master_nodes[*].name)
+    list_workers = join("\n", var.worker_nodes[*].name)
 
   }
 
