@@ -12,19 +12,27 @@ variable "cluster_name" {
   description = "A cluster-name that is used to suffix every resource name"
 }
 
-variable "region" {
+
+#----------------
+# Networking
+#----------------
+variable "network_region" {
   type        = string
-  description = "In which region should your cluster be? (eu-central, us-east)"
+  description = "In which network region should your cluster network be? (eu-central, us-east)"
   validation {
-    condition     = can(regex("(eu-central|us-east)", var.region))
-    error_message = "The region must be one of the following values: [eu-central, us-east]."
+    condition     = can(regex("(eu-central|us-east)", var.network_region))
+    error_message = "The network_region must be one of the following values: [eu-central, us-east]."
   }
 }
 
-variable "ssh_source_ips" {
-  type        = list(string)
-  default     = ["0.0.0.0/0", "::/0"]
-  description = "Limit the ips that are allowed to ssh into our cluster nodes."
+variable "ip_mode" {
+  type        = string
+  default     = "ipv6"
+  description = "Should all components talk to each other over IPv4 or IPv6? (IPv6 saves costs)"
+  validation {
+    condition     = can(regex("(ipv4|ipv6)", var.ip_mode))
+    error_message = "The ip_mode must either by 'ipv4' or 'ipv6'."
+  }
 }
 
 variable "cluster_vpc_cidr" {
@@ -35,10 +43,27 @@ variable "cluster_vpc_cidr" {
 
 variable "cluster_subnet_cidr" {
   type        = string
-  default     = "10.123.1.0/24"
-  description = "A valid CIDR within the cluster_vpc_cidr"
+  default     = "10.123.0.0/24"
+  description = "A valid CIDR within the cluster_vpc_cidr for the cluster subnet"
 }
 
+variable "nodeport_source_ips" {
+  type        = list(string)
+  default     = ["0.0.0.0/0", "::/0"]
+  description = "Who is allowed to connect to your nodeport services (e.g only a LoadBalancer...)?"
+}
+
+variable "ssh_source_ips" {
+  type        = list(string)
+  default     = ["0.0.0.0/0", "::/0"]
+  description = "Limit the ips that are allowed to ssh into our cluster nodes."
+}
+
+variable "kubeapi_source_ips" {
+  type        = list(string)
+  default     = ["0.0.0.0/0", "::/0"]
+  description = "Limit the ips that are allowed to talk to our kubeapi. (Worker-nodes will always be allowed)"
+}
 
 #----------------
 # Toggle Vars
@@ -50,38 +75,28 @@ variable "enable_server_backups" {
   description = "Wether to enable server backups in hcloud."
 }
 
-variable "ip_mode" {
-  type        = string
-  default     = "ipv6"
-  description = "All in on IPv4 or IPv6?"
-  validation {
-    condition     = can(regex("(ipv4|ipv6)", var.ip_mode))
-    error_message = "The ip_mode must either by 'ipv4' or 'ipv6'."
-  }
-}
-
 #----------------
-# SSH vars (default)
+# SSH vars 
 #----------------
-variable "default_ssh_port" {
+variable "ssh_port" {
   type        = number
   default     = 22
-  description = "The default SSH Port configured and rechable on each machine"
+  description = "The SSH Port configured and rechable on each machine"
 }
 
-variable "default_ssh_user" {
+variable "ssh_user" {
   type        = string
   default     = "ansible"
-  description = "Username of a default admin user created on every machine (used by ansible)"
+  description = "Username of a admin user created on every machine (used by ansible)"
 }
 
-variable "default_ssh_keys" {
+variable "ssh_keys" {
   type        = list(string)
-  description = "List of default (public) ssh keys to configure on the ssh_user"
+  description = "List of (public) ssh keys to configure on the ssh_user"
 }
 
 #----------------
-# Control Plane vars
+# Control Plane
 #----------------
 variable "master_nodes" {
   type = list(object({
@@ -94,11 +109,8 @@ variable "master_nodes" {
       name    = string
       size_gb = number
     }))
-    ssh_user = string
-    ssh_keys = list(string)
-    ssh_port = number
   }))
-  description = "List of master nodes to provision in the cluster, each master node has a set of values you can configure, ssh_* variables use the default if omitted"
+  description = "List of master nodes to provision in the cluster, each master node has a set of values you can uniqly configure"
   default = [
     {
       name        = "master-0"
@@ -107,21 +119,12 @@ variable "master_nodes" {
       labels      = {}
       location    = "hel1"
       volumes     = []
-      ssh_user    = ""
-      ssh_keys    = []
-      ssh_port    = 0
     }
   ]
 }
 
-variable "kubeapi_source_ips" {
-  type        = list(string)
-  default     = ["0.0.0.0/0", "::/0"]
-  description = "Limit the ips that are allowed to talk to our kubeapi. (Worker-nodes will always be allowed)"
-}
-
 #----------------
-# Worker node vars
+# Compute Plane
 #----------------
 variable "worker_nodes" {
   type = list(object({
@@ -134,11 +137,8 @@ variable "worker_nodes" {
       name    = string
       size_gb = number
     }))
-    ssh_user = string
-    ssh_keys = list(string)
-    ssh_port = number
   }))
-  description = "List of worker nodes to provision in the cluster, each master node has a set of values you can configure, ssh_* variables use the default if omitted"
+  description = "List of worker nodes to provision in the cluster, each master node has a set of values you can uniqly configure"
   default = [
     {
       name        = "worker-0"
@@ -147,15 +147,6 @@ variable "worker_nodes" {
       labels      = {}
       location    = "nbg1"
       volumes     = []
-      ssh_user    = ""
-      ssh_keys    = []
-      ssh_port    = 0
     }
   ]
-}
-
-variable "nodeport_source_ips" {
-  type        = list(string)
-  default     = ["0.0.0.0/0", "::/0"]
-  description = "Who is allowed to connect to your nodeport services (e.g only a LoadBalancer...)"
 }

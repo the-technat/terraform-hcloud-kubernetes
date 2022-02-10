@@ -31,7 +31,7 @@ resource "hcloud_firewall" "control_plane" {
   rule {
     direction  = "in"
     protocol   = "tcp"
-    port       = var.master_nodes[count.index].ssh_port != 0 ? var.master_nodes[count.index].ssh_port : var.default_ssh_port
+    port       = var.ssh_port
     source_ips = var.ssh_source_ips
   }
 
@@ -70,8 +70,8 @@ resource "hcloud_volume" "master" {
   labels = merge({
     "managed-by"   = "terraform"
     "cluster-name" = var.cluster_name
-  }, var.common_labels)
-
+    "service"      = "k8s_at_hetzner"
+  }, var.common_labels, local.master_volumes[count.index].labels)
 }
 
 resource "hcloud_server" "master" {
@@ -83,7 +83,7 @@ resource "hcloud_server" "master" {
   location           = var.master_nodes[count.index].location
   placement_group_id = hcloud_placement_group.control_plane.id
   backups            = var.enable_server_backups
-  ssh_keys           = var.master_nodes[count.index].ssh_keys != [] ? var.master_nodes[count.index].ssh_keys : var.default_ssh_keys
+  ssh_keys           = hcloud_ssh_key.ssh_key[*].id
   network {
     network_id = hcloud_network.cluster_net.id
   }
@@ -91,9 +91,9 @@ resource "hcloud_server" "master" {
   user_data = templatefile(
     "${path.module}/templates/control_plane_cloud-init.tmpl",
     {
-      ssh_user = var.master_nodes[count.index].ssh_user != "" ? var.master_nodes[count.index].ssh_user : var.default_ssh_user
-      ssh_keys = var.master_nodes[count.index].ssh_keys != [] ? var.master_nodes[count.index].ssh_keys : var.default_ssh_keys
-      ssh_port = var.master_nodes[count.index].ssh_port != 0 ? var.master_nodes[count.index].ssh_port : var.default_ssh_port
+      ssh_user = var.ssh_user
+      ssh_keys = var.ssh_keys
+      ssh_port = var.ssh_port
     }
   )
 
@@ -105,5 +105,5 @@ resource "hcloud_server" "master" {
     "control_plane" = "true"
   }, var.common_labels, var.master_nodes[count.index].labels)
 
-  depends_on = [hcloud_network_subnet.cluster_subnet]
+  depends_on = [hcloud_network_subnet.cluster_subnet, hcloud_ssh_key.ssh_key]
 }

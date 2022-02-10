@@ -4,18 +4,20 @@ locals {
   master_volumes = flatten([
     for server in var.master_nodes : [
       for volume_key, volume in server.volumes : {
-        name      = volume.size
-        size      = volume.size
+        name      = volume.name
+        size      = volume.size_gb
         server_id = hcloud_server.master[server.index].id
+        labels    = hcloud_server.master[server.index].labels
       }
     ]
   ])
   worker_volumes = flatten([
     for server in var.worker_nodes : [
       for volume_key, volume in server.volumes : {
-        name      = volume.size
-        size      = volume.size
+        name      = volume.name
+        size      = volume.size_gb
         server_id = hcloud_server.worker[server.index].id
+        labels    = hcloud_server.worker[server.index].labels
       }
     ]
   ])
@@ -29,9 +31,9 @@ data "template_file" "inventory" {
   template = file("${path.module}/templates/inventory.tpl")
 
   vars = {
-    connection_strings_master = join("\n", formatlist("%s ansible_user=%s ansible_host=%s ansible_port=%d", var.master_nodes[*].name, var.default_ssh_user, hcloud_server.master[*].ipv4_address, var.default_ssh_port))
+    connection_strings_master = join("\n", formatlist("%s ansible_user=%s ansible_host=%s ansible_port=%d", var.master_nodes[*].name, var.ssh_user, hcloud_server.master[*].ipv4_address, var.ssh_port))
 
-    connection_strings_worker = join("\n", formatlist("%s ansible_user=%s ansible_host=%s ansible_port=%d", var.worker_nodes[*].name, var.default_ssh_user, hcloud_server.worker[*].ipv4_address, var.default_ssh_port))
+    connection_strings_worker = join("\n", formatlist("%s ansible_user=%s ansible_host=%s ansible_port=%d", var.worker_nodes[*].name, var.ssh_user, hcloud_server.worker[*].ipv4_address, var.ssh_port))
 
   }
 
