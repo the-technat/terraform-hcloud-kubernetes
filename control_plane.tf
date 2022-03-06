@@ -88,7 +88,7 @@ resource "hcloud_server" "master" {
     network_id = hcloud_network.cluster_net.id
   }
 
-  user_data = templatefile(
+  user_data = var.master_nodes[count.index].user_data != "" ? var.master_nodes[count.index].user_data : templatefile(
     "${path.module}/templates/control_plane_cloud-init.tmpl",
     {
       ssh_user = var.ssh_user

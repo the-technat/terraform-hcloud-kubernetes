@@ -76,7 +76,7 @@ variable "enable_server_backups" {
 }
 
 #----------------
-# SSH vars 
+# SSH vars
 #----------------
 variable "ssh_port" {
   type        = number
@@ -109,6 +109,7 @@ variable "master_nodes" {
       name    = string
       size_gb = number
     }))
+    user_data = string
   }))
   description = "List of master nodes to provision in the cluster, each master node has a set of values you can uniqly configure"
   default = [
@@ -119,6 +120,7 @@ variable "master_nodes" {
       labels      = {}
       location    = "hel1"
       volumes     = []
+      user_data   = ""
     }
   ]
 }
@@ -137,6 +139,7 @@ variable "worker_nodes" {
       name    = string
       size_gb = number
     }))
+    user_data = string
   }))
   description = "List of worker nodes to provision in the cluster, each master node has a set of values you can uniqly configure"
   default = [
@@ -147,6 +150,7 @@ variable "worker_nodes" {
       labels      = {}
       location    = "nbg1"
       volumes     = []
+      user_data   = ""
     }
   ]
 }
