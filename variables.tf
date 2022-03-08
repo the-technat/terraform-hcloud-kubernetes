@@ -35,6 +35,16 @@ variable "ip_mode" {
   }
 }
 
+variable "kubeapi_ha_type" {
+  type        = string
+  default     = "load_balancer"
+  description = "How should the kubeapi served HA (via load_balancer, floating_ip, dns or none)"
+  validation {
+    condition     = can(regex("(load_balancer|floating_ip|dns|none)", var.kubeapi_ha_type))
+    error_message = "The ip_mode must either by 'load_balancer', 'floating_ip', 'dns' or 'none'."
+  }
+}
+
 variable "cluster_vpc_cidr" {
   type        = string
   default     = "10.123.0.0/16"

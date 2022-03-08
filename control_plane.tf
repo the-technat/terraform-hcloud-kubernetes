@@ -1,7 +1,10 @@
 #----------------
 # Networking
 #----------------
+
+# floating_ip
 resource "hcloud_floating_ip" "kubeapi" {
+  count         = var.kubeapi_ha_type == "floating_ip" ? 1 : 0
   type          = var.ip_mode
   home_location = var.master_nodes[0].location
   name          = "kubeapi-${var.cluster_name}"
@@ -14,8 +17,54 @@ resource "hcloud_floating_ip" "kubeapi" {
 }
 
 resource "hcloud_floating_ip_assignment" "main" {
-  floating_ip_id = hcloud_floating_ip.kubeapi.id
+  count         = var.kubeapi_ha_type == "floating_ip" ? 1 : 0
+  floating_ip_id = hcloud_floating_ip.kubeapi[0].id
   server_id      = hcloud_server.master[0].id
+}
+
+# load_balancer
+resource "hcloud_load_balancer" "kubeapi" {
+  count              = var.kubeapi_ha_type == "load_balancer" ? 1 : 0
+  name               = "kubeapi-${var.cluster_name}"
+  load_balancer_type = "lb11"
+  location           = var.master_nodes[0].location
+  labels = merge({
+    "managed-by"   = "terraform"
+    "service"      = "k8s_at_hetzner"
+    "cluster-name" = var.cluster_name
+  }, var.common_labels)
+}
+
+resource "hcloud_load_balancer_target" "kubeapi_lb_target" {
+  count              = var.kubeapi_ha_type == "load_balancer" ? 1 : 0
+  type             = "label_selector"
+  load_balancer_id = hcloud_load_balancer.kubeapi[0].id
+  label_selector   = "control_plane=true"
+}
+
+resource "hcloud_load_balancer_service" "kubeapi_lb_service" {
+  count              = var.kubeapi_ha_type == "load_balancer" ? 1 : 0
+  load_balancer_id = hcloud_load_balancer.kubeapi[0].id
+  protocol         = "tcp"
+  listen_port      = "6443"
+  destination_port = "6443"
+}
+
+# dns
+data "hetznerdns_zone" "dns_zone" {
+    name = "${var.cluster_name}"
+}
+
+resource "hetznerdns_record" "kubeapi" {
+  count     = var.kubeapi_ha_type == "dns" ? length(var.master_nodes) : 0
+  zone_id   = data.hetznerdns_zone.dns_zone.id
+  name      = "kubeapi"
+  value     = hcloud_server.master[count.index].ipv4_address
+  type      = "A"
+  ttl       = 60
+  depends_on = [
+    hcloud_server.master
+  ]
 }
 
 resource "hcloud_firewall" "control_plane" {
