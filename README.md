@@ -1,18 +1,14 @@
 # terraform-hcloud-kubernetes
 
-Terraform Module to deploy the Infrastructure required for a Kubernetes Cluster at Hetzner Cloud
+Terraform Module to deploy the Infrastructure required for a public-net Kubernetes Cluster at Hetzner Cloud
 
 ## Supported Os
 
 Currently only ubuntu 22.04
 
-## Design Principles
-
-As the [Kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources) provider states it's best practise to apply K8S clusters and their addons in separate Terraform runs if you intend to deploy k8s addons using Terraform to avoid circular dependencies (Yes that's possible and a nightmare to fix, trust me...). Therefore this module only uses the [hcloud](https://registry.terraform.io/providers/hetznercloud/hcloud/latest) provider to provision the infrastructure for a Kubernetes cluster. The cluster itself shall be bootstraped using kubeadm or [kubespray](https://github.com/kubernetes-sigs/kubespray) as we think that [provisioners](https://www.terraform.io/language/resources/provisioners/syntax) are not really maintainable in the long run. Addons must be deployed separately. A solution for this will be published in the [k8s_at_hetzner](https://code.immerda.ch/k8s_at_hetzner) group.  
-
 ## Usage
 
-An example repo how to call this module can be found [here](https://code.immerda.ch/k8s_at_hetzner/example.com).
+An example repo how to call this module can be found [here](https://github.com/alleaffengaffen/cks_training/blob/main/kubernetes.tf).
 
 ## To Do
 

@@ -81,9 +81,6 @@ resource "hcloud_server" "master" {
   placement_group_id = hcloud_placement_group.control_plane.id
   backups            = var.enable_server_backups
   ssh_keys           = hcloud_ssh_key.default_ssh_keys[*].id
-  network {
-    network_id = hcloud_network.cluster_net.id
-  }
 
   user_data = templatefile(
     "${path.module}/templates/control_plane_cloud-init.tmpl",
@@ -106,5 +103,4 @@ resource "hcloud_server" "master" {
     "control_plane" = "true"
   }, var.common_labels, var.master_nodes[count.index].labels)
 
-  depends_on = [hcloud_network_subnet.cluster_subnet]
 }

@@ -27,18 +27,6 @@ variable "ssh_source_ips" {
   description = "Limit the ips that are allowed to ssh into our cluster nodes."
 }
 
-variable "cluster_vpc_cidr" {
-  type        = string
-  default     = "10.123.0.0/16"
-  description = "A valid CIDR for the cluster network (multiple subnets within that network will be created)"
-}
-
-variable "cluster_subnet_cidr" {
-  type        = string
-  default     = "10.123.1.0/24"
-  description = "A valid CIDR within the cluster_vpc_cidr"
-}
-
 #----------------
 # Toggle Vars
 # Switch things on and off
@@ -57,6 +45,12 @@ variable "ip_mode" {
     condition     = can(regex("(ipv4|ipv6)", var.ip_mode))
     error_message = "The ip_mode must either by 'ipv4' or 'ipv6'."
   }
+}
+
+variable "enable_private_networking" {
+  type        = bool
+  default     = false
+  description = "Whether to deploy a private network or not"
 }
 
 variable "bootstrap_nodes" {
