@@ -2,11 +2,9 @@
 
 Terraform Module to deploy the Infrastructure required for a public-net Kubernetes Cluster at Hetzner Cloud
 
-## Supported Os
-
-Currently only ubuntu 22.04
-
 ## Usage
+
+The module is published on the official terraform registry: <https://registry.terraform.io/modules/alleaffengaffen/kubernetes/hcloud/latest>
 
 An example repo how to call this module can be found [here](https://github.com/alleaffengaffen/cks_training/blob/main/kubernetes.tf).
 
@@ -25,7 +23,7 @@ No requirements.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_hcloud"></a> [hcloud](#provider\_hcloud) | 1.36.2 |
+| <a name="provider_hcloud"></a> [hcloud](#provider\_hcloud) | n/a |
 
 ## Modules
 
