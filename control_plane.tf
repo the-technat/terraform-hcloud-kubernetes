@@ -80,7 +80,7 @@ resource "hcloud_server" "master" {
   location           = var.master_nodes[count.index].location
   placement_group_id = hcloud_placement_group.control_plane.id
   backups            = var.enable_server_backups
-  ssh_keys           = var.master_nodes[count.index].ssh_keys != [] ? var.master_nodes[count.index].ssh_keys : var.default_ssh_keys
+  ssh_keys           = var.master_nodes[count.index].ssh_keys != [] ? var.master_nodes[count.index].ssh_keys : hcloud_ssh_key.default_ssh_keys[*].id
   network {
     network_id = hcloud_network.cluster_net.id
   }
