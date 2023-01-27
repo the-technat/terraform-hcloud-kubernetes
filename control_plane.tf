@@ -29,7 +29,7 @@ resource "hcloud_firewall" "control_plane" {
   rule {
     direction  = "in"
     protocol   = "tcp"
-    port       = var.master_nodes[count.index].ssh_port != 0 ? var.master_nodes[count.index].ssh_port : var.default_ssh_port
+    port       = var.default_ssh_port
     source_ips = var.ssh_source_ips
   }
 
@@ -80,7 +80,7 @@ resource "hcloud_server" "master" {
   location           = var.master_nodes[count.index].location
   placement_group_id = hcloud_placement_group.control_plane.id
   backups            = var.enable_server_backups
-  ssh_keys           = var.master_nodes[count.index].ssh_keys != [] ? var.master_nodes[count.index].ssh_keys : hcloud_ssh_key.default_ssh_keys[*].id
+  ssh_keys           = hcloud_ssh_key.default_ssh_keys[*].id
   network {
     network_id = hcloud_network.cluster_net.id
   }
@@ -88,9 +88,9 @@ resource "hcloud_server" "master" {
   user_data = templatefile(
     "${path.module}/templates/control_plane_cloud-init.tmpl",
     {
-      ssh_user = var.master_nodes[count.index].ssh_user != "" ? var.master_nodes[count.index].ssh_user : var.default_ssh_user
-      ssh_keys = var.master_nodes[count.index].ssh_keys != [] ? var.master_nodes[count.index].ssh_keys : var.default_ssh_keys
-      ssh_port = var.master_nodes[count.index].ssh_port != 0 ? var.master_nodes[count.index].ssh_port : var.default_ssh_port
+      ssh_user = var.default_ssh_user
+      ssh_keys = var.default_ssh_keys
+      ssh_port = var.default_ssh_port
     }
   )
 

@@ -99,9 +99,6 @@ variable "master_nodes" {
       name    = string
       size_gb = number
     }))
-    ssh_user = string
-    ssh_keys = list(string)
-    ssh_port = number
   }))
   description = "List of master nodes to provision in the cluster, each master node has a set of values you can configure, ssh_* variables use the default if omitted"
   default = [
@@ -112,9 +109,6 @@ variable "master_nodes" {
       labels      = {}
       location    = "hel1"
       volumes     = []
-      ssh_user    = ""
-      ssh_keys    = []
-      ssh_port    = 0
     }
   ]
 }
@@ -139,9 +133,6 @@ variable "worker_nodes" {
       name    = string
       size_gb = number
     }))
-    ssh_user = string
-    ssh_keys = list(string)
-    ssh_port = number
   }))
   description = "List of worker nodes to provision in the cluster, each master node has a set of values you can configure, ssh_* variables use the default if omitted"
   default = [
@@ -152,9 +143,6 @@ variable "worker_nodes" {
       labels      = {}
       location    = "nbg1"
       volumes     = []
-      ssh_user    = ""
-      ssh_keys    = []
-      ssh_port    = 0
     }
   ]
 }
