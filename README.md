@@ -15,7 +15,6 @@ An example repo how to call this module can be found [here](https://github.com/a
 A list of open ideas:
 
 - [ ] Generate ansible kubespray inventory similar to [this one](https://github.com/kubernetes-sigs/kubespray/blob/master/contrib/terraform/hetzner/modules/kubernetes-cluster/templates/cloud-init.tmpl)
-- [ ] Create module release pipeline with semversions and publish to TF registry
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -26,7 +25,7 @@ No requirements.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_hcloud"></a> [hcloud](#provider\_hcloud) | n/a |
+| <a name="provider_hcloud"></a> [hcloud](#provider\_hcloud) | 1.36.2 |
 
 ## Modules
 
@@ -40,12 +39,11 @@ No modules.
 | [hcloud_firewall.control_plane](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/firewall) | resource |
 | [hcloud_floating_ip.kubeapi](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/floating_ip) | resource |
 | [hcloud_floating_ip_assignment.main](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/floating_ip_assignment) | resource |
-| [hcloud_network.cluster_net](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/network) | resource |
-| [hcloud_network_subnet.cluster_subnet](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/network_subnet) | resource |
 | [hcloud_placement_group.compute_plane](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/placement_group) | resource |
 | [hcloud_placement_group.control_plane](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/placement_group) | resource |
 | [hcloud_server.master](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/server) | resource |
 | [hcloud_server.worker](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/server) | resource |
+| [hcloud_ssh_key.default_ssh_keys](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/ssh_key) | resource |
 | [hcloud_volume.master](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/volume) | resource |
 | [hcloud_volume.worker](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/resources/volume) | resource |
 | [hcloud_locations.datacenters](https://registry.terraform.io/providers/hetznercloud/hcloud/latest/docs/data-sources/locations) | data source |
@@ -55,23 +53,25 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_bootstrap_nodes"></a> [bootstrap\_nodes](#input\_bootstrap\_nodes) | Whether cloud-init should install all required tools on the nodes or not | `bool` | `false` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | A cluster-name that is used to suffix every resource name | `string` | n/a | yes |
-| <a name="input_cluster_subnet_cidr"></a> [cluster\_subnet\_cidr](#input\_cluster\_subnet\_cidr) | A valid CIDR within the cluster\_vpc\_cidr | `string` | `"10.123.1.0/24"` | no |
-| <a name="input_cluster_vpc_cidr"></a> [cluster\_vpc\_cidr](#input\_cluster\_vpc\_cidr) | A valid CIDR for the cluster network (multiple subnets within that network will be created) | `string` | `"10.123.0.0/16"` | no |
 | <a name="input_common_labels"></a> [common\_labels](#input\_common\_labels) | Common map of labels to add on all resources | `map(string)` | `{}` | no |
 | <a name="input_default_ssh_keys"></a> [default\_ssh\_keys](#input\_default\_ssh\_keys) | List of default (public) ssh keys to configure on the ssh\_user | `list(string)` | n/a | yes |
 | <a name="input_default_ssh_port"></a> [default\_ssh\_port](#input\_default\_ssh\_port) | The default SSH Port configured and rechable on each machine | `number` | `22` | no |
 | <a name="input_default_ssh_user"></a> [default\_ssh\_user](#input\_default\_ssh\_user) | Username of a default admin user created on every machine (used by ansible) | `string` | `"ansible"` | no |
+| <a name="input_enable_private_networking"></a> [enable\_private\_networking](#input\_enable\_private\_networking) | Whether to deploy a private network or not | `bool` | `false` | no |
 | <a name="input_enable_server_backups"></a> [enable\_server\_backups](#input\_enable\_server\_backups) | Wether to enable server backups in hcloud. | `bool` | `false` | no |
 | <a name="input_ip_mode"></a> [ip\_mode](#input\_ip\_mode) | All in on IPv4 or IPv6? | `string` | `"ipv6"` | no |
 | <a name="input_kubeapi_source_ips"></a> [kubeapi\_source\_ips](#input\_kubeapi\_source\_ips) | Limit the ips that are allowed to talk to our kubeapi. (Worker-nodes will always be allowed) | `list(string)` | <pre>[<br>  "0.0.0.0/0",<br>  "::/0"<br>]</pre> | no |
-| <a name="input_master_nodes"></a> [master\_nodes](#input\_master\_nodes) | List of master nodes to provision in the cluster, each master node has a set of values you can configure, ssh\_* variables use the default if omitted | <pre>list(object({<br>    name        = string<br>    server_type = string<br>    image       = string<br>    labels      = map(string)<br>    location    = string<br>    volumes = list(object({<br>      name    = string<br>      size_gb = number<br>    }))<br>    ssh_user = string<br>    ssh_keys = list(string)<br>    ssh_port = number<br>  }))</pre> | <pre>[<br>  {<br>    "image": "debian-11",<br>    "labels": {},<br>    "location": "hel1",<br>    "name": "master-0",<br>    "server_type": "cpx11",<br>    "ssh_keys": [],<br>    "ssh_port": 0,<br>    "ssh_user": "",<br>    "volumes": []<br>  }<br>]</pre> | no |
+| <a name="input_master_nodes"></a> [master\_nodes](#input\_master\_nodes) | List of master nodes to provision in the cluster, each master node has a set of values you can configure, ssh\_* variables use the default if omitted | <pre>list(object({<br>    name        = string<br>    server_type = string<br>    image       = string<br>    labels      = map(string)<br>    location    = string<br>    volumes = list(object({<br>      name    = string<br>      size_gb = number<br>    }))<br>  }))</pre> | <pre>[<br>  {<br>    "image": "ubuntu-22.04",<br>    "labels": {},<br>    "location": "hel1",<br>    "name": "master-0",<br>    "server_type": "cpx11",<br>    "volumes": []<br>  }<br>]</pre> | no |
 | <a name="input_nodeport_source_ips"></a> [nodeport\_source\_ips](#input\_nodeport\_source\_ips) | Who is allowed to connect to your nodeport services (e.g only a LoadBalancer...) | `list(string)` | <pre>[<br>  "0.0.0.0/0",<br>  "::/0"<br>]</pre> | no |
 | <a name="input_region"></a> [region](#input\_region) | In which region should your cluster be? | `string` | n/a | yes |
 | <a name="input_ssh_source_ips"></a> [ssh\_source\_ips](#input\_ssh\_source\_ips) | Limit the ips that are allowed to ssh into our cluster nodes. | `list(string)` | <pre>[<br>  "0.0.0.0/0",<br>  "::/0"<br>]</pre> | no |
-| <a name="input_worker_nodes"></a> [worker\_nodes](#input\_worker\_nodes) | List of worker nodes to provision in the cluster, each master node has a set of values you can configure, ssh\_* variables use the default if omitted | <pre>list(object({<br>    name        = string<br>    server_type = string<br>    image       = string<br>    labels      = map(string)<br>    location    = string<br>    volumes = list(object({<br>      name    = string<br>      size_gb = number<br>    }))<br>    ssh_user = string<br>    ssh_keys = list(string)<br>    ssh_port = number<br>  }))</pre> | <pre>[<br>  {<br>    "image": "debian-11",<br>    "labels": {},<br>    "location": "nbg1",<br>    "name": "worker-0",<br>    "server_type": "cpx31",<br>    "ssh_keys": [],<br>    "ssh_port": 0,<br>    "ssh_user": "",<br>    "volumes": []<br>  }<br>]</pre> | no |
+| <a name="input_worker_nodes"></a> [worker\_nodes](#input\_worker\_nodes) | List of worker nodes to provision in the cluster, each master node has a set of values you can configure, ssh\_* variables use the default if omitted | <pre>list(object({<br>    name        = string<br>    server_type = string<br>    image       = string<br>    labels      = map(string)<br>    location    = string<br>    volumes = list(object({<br>      name    = string<br>      size_gb = number<br>    }))<br>  }))</pre> | <pre>[<br>  {<br>    "image": "ubuntu-22.04",<br>    "labels": {},<br>    "location": "nbg1",<br>    "name": "worker-0",<br>    "server_type": "cpx31",<br>    "volumes": []<br>  }<br>]</pre> | no |
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_kubeapi_ip"></a> [kubeapi\_ip](#output\_kubeapi\_ip) | n/a |
 <!-- END_TF_DOCS -->
