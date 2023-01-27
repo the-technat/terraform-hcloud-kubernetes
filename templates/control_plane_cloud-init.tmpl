@@ -7,7 +7,7 @@ users:
     lock_passwd: True # disable password login
     gecos: "Admin user created by Terraform"
     shell: /bin/bash
-    ssh-authorized_keys:
+    ssh_authorized_keys:
     %{ for ssh_key in ssh_keys ~}
      - ${ssh_key}
     %{ endfor ~} 
