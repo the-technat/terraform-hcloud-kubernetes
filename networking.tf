@@ -3,7 +3,6 @@ resource "hcloud_network" "cluster_net" {
   ip_range = var.cluster_vpc_cidr
   labels = merge({
     "managed-by"   = "terraform"
-    "service"      = "k8s_at_hetzner"
     "cluster-name" = var.cluster_name
   }, var.common_labels)
 }

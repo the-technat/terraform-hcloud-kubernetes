@@ -1,5 +1,5 @@
 locals {
-  datacenters = { eu-central = ["hel1", "fsn1", "nbg1"], us-east = ["ash"] }
+  datacenters = { eu-central = ["hel1", "fsn1", "nbg1"], us-east = ["ash", "hil"] }
 
   master_volumes = flatten([
     for server in var.master_nodes : [

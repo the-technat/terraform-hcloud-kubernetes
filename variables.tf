@@ -59,6 +59,12 @@ variable "ip_mode" {
   }
 }
 
+variable "bootstrap_nodes" {
+  type        = bool
+  default     = false
+  description = "Whether cloud-init should install all required tools on the nodes or not"
+}
+
 #----------------
 # SSH vars (default)
 #----------------
@@ -102,7 +108,7 @@ variable "master_nodes" {
     {
       name        = "master-0"
       server_type = "cpx11"
-      image       = "debian-11"
+      image       = "ubuntu-22.04"
       labels      = {}
       location    = "hel1"
       volumes     = []
@@ -142,7 +148,7 @@ variable "worker_nodes" {
     {
       name        = "worker-0"
       server_type = "cpx31"
-      image       = "debian-11"
+      image       = "ubuntu-22.04"
       labels      = {}
       location    = "nbg1"
       volumes     = []

@@ -1,8 +1,10 @@
 # terraform-hcloud-kubernetes
 
-[![pipeline status](https://code.immerda.ch/k8s_at_hetzner/terraform-hcloud-kubernetes/badges/develop/pipeline.svg)](https://code.immerda.ch/k8s_at_hetzner/terraform-hcloud-kubernetes/-/commits/develop) 
-
 Terraform Module to deploy the Infrastructure required for a Kubernetes Cluster at Hetzner Cloud
+
+## Supported Os
+
+Currently only ubuntu 22.04
 
 ## Design Principles
 
@@ -17,7 +19,7 @@ An example repo how to call this module can be found [here](https://code.immerda
 A list of open ideas:
 
 - [ ] Generate ansible kubespray inventory similar to [this one](https://github.com/kubernetes-sigs/kubespray/blob/master/contrib/terraform/hetzner/modules/kubernetes-cluster/templates/cloud-init.tmpl)
-- [ ] Create module release pipeline with semversions and publish to TF registry 
+- [ ] Create module release pipeline with semversions and publish to TF registry
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -28,7 +30,7 @@ No requirements.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_hcloud"></a> [hcloud](#provider\_hcloud) | 1.32.2 |
+| <a name="provider_hcloud"></a> [hcloud](#provider\_hcloud) | n/a |
 
 ## Modules
 

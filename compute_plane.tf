@@ -80,9 +80,13 @@ resource "hcloud_server" "worker" {
     }
   )
 
+  public_net {
+    ipv4_enabled = var.ip_mode == "ipv4" ? true : false
+    ipv6_enabled = var.ip_mode == "ipv6" ? true : false
+  }
+
   labels = merge({
     "managed-by"    = "terraform"
-    "service"       = "k8s_at_hetzner"
     "cluster-name"  = var.cluster_name
     "compute_plane" = "true"
   }, var.common_labels, var.worker_nodes[count.index].labels)
