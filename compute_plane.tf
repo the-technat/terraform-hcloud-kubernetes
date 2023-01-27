@@ -17,12 +17,53 @@ resource "hcloud_firewall" "compute_plane" {
     port       = var.default_ssh_port
     source_ips = var.ssh_source_ips
   }
-
   rule {
     direction  = "in"
     protocol   = "tcp"
     port       = "30000-32767"
     source_ips = var.nodeport_source_ips
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "10250"
+    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "4240"
+    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+  }
+  rule {
+    direction  = "in"
+    protocol   = "udp"
+    port       = "8472"
+    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+  }
+  rule {
+    direction  = "in"
+    protocol   = "udp"
+    port       = "51871"
+    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "4240"
+    source_ips = var.ip_mode == "ipv4" ? local.worker_ips_v4 : local.worker_ips_v6
+  }
+  rule {
+    direction  = "in"
+    protocol   = "udp"
+    port       = "8472"
+    source_ips = var.ip_mode == "ipv4" ? local.worker_ips_v4 : local.worker_ips_v6
+  }
+  rule {
+    direction  = "in"
+    protocol   = "udp"
+    port       = "51871"
+    source_ips = var.ip_mode == "ipv4" ? local.worker_ips_v4 : local.worker_ips_v6
   }
 
   apply_to {

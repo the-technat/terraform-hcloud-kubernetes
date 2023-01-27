@@ -32,12 +32,58 @@ resource "hcloud_firewall" "control_plane" {
     port       = var.default_ssh_port
     source_ips = var.ssh_source_ips
   }
-
+  rule {
+    direction  = "in"
+    protocol   = "icmp"
+    source_ips = var.ssh_source_ips
+  }
   rule {
     direction  = "in"
     protocol   = "tcp"
     port       = "6443"
     source_ips = var.kubeapi_source_ips
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "2379-2380"
+    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "10250"
+    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "10257"
+    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "10259"
+    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+  }
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "4240"
+    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+  }
+  rule {
+    direction  = "in"
+    protocol   = "udp"
+    port       = "8472"
+    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+  }
+  rule {
+    direction  = "in"
+    protocol   = "udp"
+    port       = "51871"
+    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
   }
 
   apply_to {
