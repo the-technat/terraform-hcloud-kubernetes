@@ -129,7 +129,7 @@ resource "hcloud_server" "master" {
   ssh_keys           = hcloud_ssh_key.default_ssh_keys[*].id
 
   user_data = templatefile(
-    "${path.module}/templates/control_plane_cloud-init.tmpl",
+    local.master_templatefile,
     {
       ssh_user = var.default_ssh_user
       ssh_keys = var.default_ssh_keys
