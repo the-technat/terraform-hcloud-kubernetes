@@ -1,69 +1,51 @@
 #----------------
 # Networking
 #----------------
-resource "hcloud_firewall" "compute_plane" {
+resource "hcloud_firewall" "data_plane" {
   count = length(var.worker_nodes)
 
   name = var.worker_nodes[count.index].name
   labels = merge({
     "managed-by"   = "terraform"
     "cluster-name" = var.cluster_name
-    "service"      = "k8s_at_hetzner"
   }, var.common_labels, var.worker_nodes[count.index].labels)
 
   rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = var.default_ssh_port
-    source_ips = var.ssh_source_ips
+    direction   = "in"
+    protocol    = "tcp"
+    port        = var.default_ssh_port
+    source_ips  = var.ssh_source_ips
+    description = "ssh"
   }
   rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "30000-32767"
-    source_ips = var.nodeport_source_ips
+    direction   = "in"
+    protocol    = "icmp"
+    source_ips  = ["0.0.0.0/0", "::/0"]
+    description = "ping is a fundamental feature every server should support"
   }
   rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "10250"
-    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "30000-32767"
+    source_ips  = var.nodeport_source_ips
+    description = "nodeport services"
   }
   rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "4240"
-    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "10250"
+    source_ips  = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+    description = "kubelet"
   }
-  rule {
-    direction  = "in"
-    protocol   = "udp"
-    port       = "8472"
-    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
-  }
-  rule {
-    direction  = "in"
-    protocol   = "udp"
-    port       = "51871"
-    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
-  }
-  rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "4240"
-    source_ips = var.ip_mode == "ipv4" ? local.worker_ips_v4 : local.worker_ips_v6
-  }
-  rule {
-    direction  = "in"
-    protocol   = "udp"
-    port       = "8472"
-    source_ips = var.ip_mode == "ipv4" ? local.worker_ips_v4 : local.worker_ips_v6
-  }
-  rule {
-    direction  = "in"
-    protocol   = "udp"
-    port       = "51871"
-    source_ips = var.ip_mode == "ipv4" ? local.worker_ips_v4 : local.worker_ips_v6
+  dynamic "rule" {
+    for_each = var.additional_fw_rules_worker
+    content {
+      direction   = rule.value["direction"]
+      protocol    = rule.value["protocol"]
+      port        = rule.value["port"]
+      source_ips  = concat(rule.value["source_ips"], rule.value["inject_worker_ips"] == true ? local.worker_ips : null, rule.value["inject_master_ips"] == true ? local.master_ips : null)
+      description = rule.value["description"]
+    }
   }
 
   apply_to {
@@ -74,12 +56,11 @@ resource "hcloud_firewall" "compute_plane" {
 #----------------
 # Compute
 #----------------
-resource "hcloud_placement_group" "compute_plane" {
-  name = "compute_plane-${var.cluster_name}"
+resource "hcloud_placement_group" "data_plane" {
+  name = "data_plane-${var.cluster_name}"
   type = "spread"
   labels = merge({
     "managed-by"   = "terraform"
-    "service"      = "k8s_at_hetzner"
     "cluster-name" = var.cluster_name
   }, var.common_labels)
 }
@@ -105,7 +86,7 @@ resource "hcloud_server" "worker" {
   server_type        = var.worker_nodes[count.index].server_type
   image              = var.worker_nodes[count.index].image
   location           = var.worker_nodes[count.index].location
-  placement_group_id = hcloud_placement_group.compute_plane.id
+  placement_group_id = hcloud_placement_group.data_plane.id
   backups            = var.enable_server_backups
   ssh_keys           = hcloud_ssh_key.default_ssh_keys[*].id
 
@@ -124,9 +105,9 @@ resource "hcloud_server" "worker" {
   }
 
   labels = merge({
-    "managed-by"    = "terraform"
-    "cluster-name"  = var.cluster_name
-    "compute_plane" = "true"
+    "managed-by"   = "terraform"
+    "cluster-name" = var.cluster_name
+    "data_plane"   = "true"
   }, var.common_labels, var.worker_nodes[count.index].labels)
 
 }

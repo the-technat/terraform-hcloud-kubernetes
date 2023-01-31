@@ -2,6 +2,7 @@
 # Networking
 #----------------
 resource "hcloud_floating_ip" "kubeapi" {
+  count          = var.enable_floating_kubeapi == true ? 1 : 0
   type          = var.ip_mode
   home_location = var.master_nodes[0].location
   name          = "kubeapi-${var.cluster_name}"
@@ -13,7 +14,8 @@ resource "hcloud_floating_ip" "kubeapi" {
 }
 
 resource "hcloud_floating_ip_assignment" "main" {
-  floating_ip_id = hcloud_floating_ip.kubeapi.id
+  count          = var.enable_floating_kubeapi == true ? 1 : 0
+  floating_ip_id = hcloud_floating_ip.kubeapi[0].id
   server_id      = hcloud_server.master[0].id
 }
 
@@ -27,63 +29,63 @@ resource "hcloud_firewall" "control_plane" {
   }, var.common_labels, var.master_nodes[count.index].labels)
 
   rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = var.default_ssh_port
-    source_ips = var.ssh_source_ips
+    direction   = "in"
+    protocol    = "tcp"
+    port        = var.default_ssh_port
+    source_ips  = var.ssh_source_ips
+    description = "ssh"
   }
   rule {
-    direction  = "in"
-    protocol   = "icmp"
-    source_ips = var.ssh_source_ips
+    direction   = "in"
+    protocol    = "icmp"
+    source_ips  = ["0.0.0.0/0", "::/0"]
+    description = "ping is a fundamental feature every server should support"
   }
   rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "6443"
-    source_ips = var.kubeapi_source_ips
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "6443"
+    source_ips  = var.kubeapi_source_ips
+    description = "kube-apiserver"
   }
   rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "2379-2380"
-    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "2379-2380"
+    source_ips  = local.master_ips
+    description = "etcd"
   }
   rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "10250"
-    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "10250"
+    source_ips  = local.master_ips
+    description = "kubelet"
   }
   rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "10257"
-    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "10257"
+    source_ips  = local.master_ips
+    description = "kube-controller-manager"
   }
   rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "10259"
-    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "10259"
+    source_ips  = local.master_ips
+    description = "kube-scheduler"
   }
-  rule {
-    direction  = "in"
-    protocol   = "tcp"
-    port       = "4240"
-    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
-  }
-  rule {
-    direction  = "in"
-    protocol   = "udp"
-    port       = "8472"
-    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
-  }
-  rule {
-    direction  = "in"
-    protocol   = "udp"
-    port       = "51871"
-    source_ips = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+
+  dynamic "rule" {
+    for_each = var.additional_fw_rules_master
+    content {
+      direction   = rule.value["direction"]
+      protocol    = rule.value["protocol"]
+      port        = rule.value["port"]
+      source_ips  = concat(rule.value["source_ips"], rule.value["inject_worker_ips"] == true ? local.worker_ips : null, rule.value["inject_master_ips"] == true ? local.master_ips : null)
+      description = rule.value["description"]
+    }
   }
 
   apply_to {
