@@ -34,7 +34,7 @@ resource "hcloud_firewall" "data_plane" {
     direction   = "in"
     protocol    = "tcp"
     port        = "10250"
-    source_ips  = var.ip_mode == "ipv4" ? local.master_ips_v4 : local.master_ips_v6
+    source_ips  = concat(local.master_ips, local.worker_ips)
     description = "kubelet"
   }
   dynamic "rule" {

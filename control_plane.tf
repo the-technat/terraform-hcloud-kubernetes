@@ -59,7 +59,7 @@ resource "hcloud_firewall" "control_plane" {
     direction   = "in"
     protocol    = "tcp"
     port        = "10250"
-    source_ips  = local.master_ips
+    source_ips  = concat(local.master_ips, local.worker_ips)
     description = "kubelet"
   }
   rule {
