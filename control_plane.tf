@@ -151,4 +151,10 @@ resource "hcloud_server" "master" {
     "control_plane" = "true"
   }, var.common_labels, var.master_nodes[count.index].labels)
 
+  lifecycle {
+    ignore_changes = [
+      user_data,
+    ]
+  }
+
 }

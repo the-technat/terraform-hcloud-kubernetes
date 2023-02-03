@@ -110,4 +110,9 @@ resource "hcloud_server" "worker" {
     "data_plane"   = "true"
   }, var.common_labels, var.worker_nodes[count.index].labels)
 
+  lifecycle {
+    ignore_changes = [
+      user_data,
+    ]
+  }
 }
