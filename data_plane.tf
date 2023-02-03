@@ -113,6 +113,7 @@ resource "hcloud_server" "worker" {
   lifecycle {
     ignore_changes = [
       user_data,
+      ssh_keys,
     ]
   }
 }
