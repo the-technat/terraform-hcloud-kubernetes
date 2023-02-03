@@ -52,6 +52,10 @@ write_files:
     net.bridge.bridge-nf-call-iptables  = 1
     net.ipv4.ip_forward                 = 1
     net.bridge.bridge-nf-call-ip6tables = 1
+- path: /etc/systemd/system/kubelet.service.d/20-hcloud.conf
+  content: |
+    [Service]
+    Environment="KUBELET_EXTRA_ARGS=--cloud-provider=external"
 - path: /etc/ssh/sshd_config
   content: |
     Port 59245
