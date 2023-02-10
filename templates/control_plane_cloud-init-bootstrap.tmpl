@@ -77,6 +77,7 @@ runcmd:
   - sudo update-grub
   - sudo mkdir -p /etc/containerd
   - sudo containerd config default | sudo tee -a /etc/containerd/config.toml
+  - sudo sed -i 's/disabled_plugins = ["cri"]/disabled_plugins = []/g' /etc/containerd/config.toml
   - sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
   - wget -O- https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz | tar Oxzf -  |sudo dd of=/usr/local/bin/cilium && sudo chmod +x /usr/local/bin/cilium
   - helm repo add argo https://argoproj.github.io/argo-helm
