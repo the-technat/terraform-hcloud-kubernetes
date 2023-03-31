@@ -74,7 +74,6 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_kubeapi_ip"></a> [kubeapi\_ip](#output\_kubeapi\_ip) | n/a |
 | <a name="output_master_ips"></a> [master\_ips](#output\_master\_ips) | n/a |
 | <a name="output_worker_ips"></a> [worker\_ips](#output\_worker\_ips) | n/a |
 <!-- END_TF_DOCS -->
