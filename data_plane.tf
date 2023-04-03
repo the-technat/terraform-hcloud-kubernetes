@@ -93,9 +93,10 @@ resource "hcloud_server" "worker" {
   user_data = templatefile(
     local.worker_templatefile,
     {
-      ssh_user = var.default_ssh_user
-      ssh_keys = var.default_ssh_keys
-      ssh_port = var.default_ssh_port
+      ssh_user      = var.default_ssh_user
+      ssh_keys      = var.default_ssh_keys
+      ssh_port      = var.default_ssh_port
+      install_falco = var.install_falco
     }
   )
 

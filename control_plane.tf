@@ -2,7 +2,7 @@
 # Networking
 #----------------
 resource "hcloud_floating_ip" "kubeapi" {
-  count          = var.enable_floating_kubeapi == true ? 1 : 0
+  count         = var.enable_floating_kubeapi == true ? 1 : 0
   type          = var.ip_mode
   home_location = var.master_nodes[0].location
   name          = "kubeapi-${var.cluster_name}"
@@ -133,9 +133,10 @@ resource "hcloud_server" "master" {
   user_data = templatefile(
     local.master_templatefile,
     {
-      ssh_user = var.default_ssh_user
-      ssh_keys = var.default_ssh_keys
-      ssh_port = var.default_ssh_port
+      ssh_user      = var.default_ssh_user
+      ssh_keys      = var.default_ssh_keys
+      ssh_port      = var.default_ssh_port
+      install_falco = var.install_falco
     }
   )
 

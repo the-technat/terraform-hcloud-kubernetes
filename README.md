@@ -2,11 +2,17 @@
 
 Terraform Module to deploy the Infrastructure required for a public-net Kubernetes Cluster at Hetzner Cloud
 
+## Design
+
+This module only touches hcloud infrastructure and cloud-init. It will never bootstrap any cluster for you (except for the things done in cloud-init).
+
+I'm simply not a fan of local/remote execs and provisioners in Terraform.
+
 ## Usage
 
 The module is published on the official terraform registry: <https://registry.terraform.io/modules/alleaffengaffen/kubernetes/hcloud/latest>
 
-An example repo how to call this module can be found [here](https://github.com/alleaffengaffen/cks_training/blob/main/kubernetes.tf).
+An example repo how to call this module can be found [here](https://github.com/alleaffengaffen/cks_training/blob/main/00_lab_env/kubernetes.tf).
 
 ## To Do
 

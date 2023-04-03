@@ -65,6 +65,12 @@ variable "bootstrap_nodes" {
   description = "Whether cloud-init should install all required tools on the nodes or not"
 }
 
+variable "install_falco" {
+  type        = bool
+  default     = false
+  description = "Whether falco should be installed on the hosts"
+}
+
 #----------------
 # SSH vars (default)
 #----------------
